@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package com.wise.netty.protobuf.singleprotocol;
+
+option java_package = "com.wise.netty.protobuf.singleprotocol";
+option java_outer_classname = "StudentProto";
+
+message Student {
+
+    required string name = 1;
+
+    optional int32 age = 2;
+
+    optional string address = 3;
+
+}
