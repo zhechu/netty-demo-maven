@@ -40,11 +40,11 @@ public class ServerMsgPackEcho {
                     protected void initChannel(Channel ch) throws Exception {
                         // 根据消息长度，从中剥离出完整的实际数据
                         ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(
-                                65535, // 两个字节，2的16次方
-                                0,
-                                2, // 字段域长度，2个字节
-                                0,
-                                2 // 剪裁掉字段域
+                                65535, // 两个字节，2的16次方。定义接收数据包的最大长度，如果发送的数据包超过此值，则抛出异常
+                                0, // 长度属性部分的偏移值，0表示长度属性位于数据包头部
+                                2, // 字段域长度，2个字节。长度属性的字节长度
+                                0, // 协议体长度调节值，修正信息长度，如果设置为4，那么解码时再向后推4个字节
+                                2 // 剪裁掉字段域。跳过字节数，如我们想跳过长度属性部分
                         ));
                         // 反序列化
                         ch.pipeline().addLast(new MsgPackDecoder());
