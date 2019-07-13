@@ -9,9 +9,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 作者：Mark/Maoke
- * 创建日期：2018/08/25
- * 类说明：自己的业务处理
+ * 业务处理器
  */
 @ChannelHandler.Sharable
 public class MsgPackServerHandler extends ChannelInboundHandlerAdapter {
@@ -21,13 +19,11 @@ public class MsgPackServerHandler extends ChannelInboundHandlerAdapter {
     /*** 服务端读取到网络数据后的处理*/
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        //将上一个handler生成的数据强制转型
-        User user = (User)msg;
-        System.out.println("Server Accept["+user
-                +"] and the counter is:"+counter.incrementAndGet());
-        //服务器的应答
-        String resp = "I process user :"+user.getUserName()
-                + System.getProperty("line.separator");
+        // 将上一个handler生成的数据强制转型
+        User user = (User) msg;
+        System.out.println("Server Accept["+user+"] and the counter is:"+counter.incrementAndGet());
+        // 服务器的应答
+        String resp = "I process user :"+user.getUserName()+ System.getProperty("line.separator");
         ctx.writeAndFlush(Unpooled.copiedBuffer(resp.getBytes()));
     }
 
@@ -37,4 +33,5 @@ public class MsgPackServerHandler extends ChannelInboundHandlerAdapter {
         cause.printStackTrace();
         ctx.close();
     }
+
 }

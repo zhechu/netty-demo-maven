@@ -15,9 +15,7 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 import java.net.InetSocketAddress;
 
 /**
- * 作者：Mark/Maoke
- * 创建日期：2018/08/26
- * 类说明：
+ * 客户端
  */
 public class ClientMsgPackEcho {
 
@@ -34,9 +32,19 @@ public class ClientMsgPackEcho {
             b.group(group)/*将线程组传入*/
                     .channel(NioSocketChannel.class)/*指定使用NIO进行网络传输*/
                     /*配置要连接服务器的ip地址和端口*/
-                    .remoteAddress(
-                            new InetSocketAddress(host, 8899))
-                    .handler(new ChannelInitializerImp());
+                    .remoteAddress(new InetSocketAddress(host, 8899))
+                    .handler(new ChannelInitializer<Channel>() {
+                        @Override
+                        protected void initChannel(Channel ch) throws Exception {
+                            // 这里设置报文的包头长度来避免粘包
+                            ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
+                            // 对发送的数据进行序列化
+                            ch.pipeline().addLast(new MsgPackEncoder());
+                            // 处理服务器的应答
+                            ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
+                            ch.pipeline().addLast(new MsgPackClientHandler(5));
+                        }
+                    });
             ChannelFuture f = b.connect().sync();
             System.out.println("已连接到服务器.....");
             f.channel().closeFuture().sync();
@@ -45,23 +53,8 @@ public class ClientMsgPackEcho {
         }
     }
 
-    private static class ChannelInitializerImp extends ChannelInitializer<Channel> {
-
-        @Override
-        protected void initChannel(Channel ch) throws Exception {
-
-            //这里设置报文的包头长度来避免粘包
-            ch.pipeline().addLast("frameEncoder",
-                    new LengthFieldPrepender(2));
-            //对发送的数据进行序列化
-            ch.pipeline().addLast(new MsgPackEncoder());
-            //处理服务器的应答
-            ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
-            ch.pipeline().addLast(new MsgPackClientHandler(5));
-        }
-    }
-
     public static void main(String[] args) throws InterruptedException {
         new ClientMsgPackEcho("127.0.0.1").start();
     }
+
 }

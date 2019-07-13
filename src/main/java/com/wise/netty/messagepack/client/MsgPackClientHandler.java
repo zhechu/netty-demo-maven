@@ -10,11 +10,10 @@ import io.netty.util.CharsetUtil;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 作者：Mark/Maoke
- * 创建日期：2018/08/26
- * 类说明：
+ * 业务处理器
  */
 public class MsgPackClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
+
     private final int sendNumber;
 
     public MsgPackClientHandler(int sendNumber) {
@@ -25,15 +24,14 @@ public class MsgPackClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     /*** 客户端读取到网络数据后的处理*/
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-        System.out.println("client Accept["+msg.toString(CharsetUtil.UTF_8)
-                +"] and the counter is:"+counter.incrementAndGet());
+        System.out.println("client Accept["+msg.toString(CharsetUtil.UTF_8)+"] and the counter is:"+counter.incrementAndGet());
     }
 
     /*** 客户端被通知channel活跃后，做事*/
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         User[] users = makeUsers();
-        //发送数据
+        // 发送数据
         for(User user:users){
             System.out.println("Send user:"+user);
             ctx.write(user);
@@ -58,10 +56,10 @@ public class MsgPackClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
             String userName = "ABCDEFG --->"+i;
             user.setUserName(userName);
             user.setId("No:"+(sendNumber-i));
-            user.setUserContact(
-                    new UserContact(userName+"@xiangxue.com","133"));
+            user.setUserContact(new UserContact(userName+"@xiangxue.com","133"));
             users[i]=user;
         }
         return users;
     }
+
 }

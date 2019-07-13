@@ -13,9 +13,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import java.net.InetSocketAddress;
 
 /**
- * 作者：Mark/Maoke
- * 创建日期：2018/08/25
- * 类说明：
+ * 服务端
  */
 public class ServerMsgPackEcho {
 
@@ -37,26 +35,28 @@ public class ServerMsgPackEcho {
                 .localAddress(new InetSocketAddress(PORT))/*指定服务器监听端口*/
                 /*服务端每接收到一个连接请求，就会新启一个socket通信，也就是channel，
                 所以下面这段代码的作用就是为这个子channel增加handle*/
-                .childHandler(new ChannelInitializerImp());
+                .childHandler(new ChannelInitializer<Channel>() {
+                    @Override
+                    protected void initChannel(Channel ch) throws Exception {
+                        // 根据消息长度，从中剥离出完整的实际数据
+                        ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(
+                                65535, // 两个字节，2的16次方
+                                0,
+                                2, // 字段域长度，2个字节
+                                0,
+                                2 // 剪裁掉字段域
+                        ));
+                        // 反序列化
+                        ch.pipeline().addLast(new MsgPackDecoder());
+                        // 将反序列化后的实体类交给业务处理
+                        ch.pipeline().addLast(new MsgPackServerHandler());
+                    }
+                });
             ChannelFuture f = b.bind().sync();/*异步绑定到服务器，sync()会阻塞直到完成*/
             System.out.println("服务器启动完成，等待客户端的连接和数据.....");
             f.channel().closeFuture().sync();/*阻塞直到服务器的channel关闭*/
         } finally {
             group.shutdownGracefully().sync();/*优雅关闭线程组*/
-        }
-    }
-
-    private static class ChannelInitializerImp extends ChannelInitializer<Channel> {
-
-        @Override
-        protected void initChannel(Channel ch) throws Exception {
-            //根据消息长度，从中剥离出完整的实际数据
-            ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(65535,
-                    0,2,0,2));
-            //反序列化
-            ch.pipeline().addLast(new MsgPackDecoder());
-            //将反序列化后的实体类交给业务处理
-            ch.pipeline().addLast(new MsgPackServerHandler());
         }
     }
 

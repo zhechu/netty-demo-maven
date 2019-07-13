@@ -3,23 +3,22 @@ package com.wise.netty.messagepack;
 import org.msgpack.annotation.Message;
 
 /**
- * @author Mark老师   享学课堂 https://enjoy.ke.qq.com
- * 类说明：实体类
+ * 实体类
  */
-@Message//MessagePack提供的注解，表明这是一个需要序列化的实体类
+@Message // MessagePack提供的注解，表明这是一个需要序列化的实体类
 public class User {
+
     private String id;
     private String userName;
     private int age;
     private UserContact userContact;
 
+    public User() {}
+
     public User(String userName, int age, String id) {
         this.userName = userName;
         this.age = age;
         this.id = id;
-    }
-
-    public User() {
     }
 
     public String getUserName() {
@@ -63,4 +62,5 @@ public class User {
                 ", userContact=" + userContact +
                 '}';
     }
+
 }
